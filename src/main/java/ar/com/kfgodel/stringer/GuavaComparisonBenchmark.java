@@ -16,11 +16,22 @@ public class GuavaComparisonBenchmark {
 
 
   private ExamplePojo pojo = ExamplePojo.createDefault();
-  private Stringer stringer;
+  private Stringer defaultStringer;
+  private Stringer immutableStringer;
 
   @Setup(Level.Trial)
   public void prepareStringers() {
-    stringer = createStringer();
+    defaultStringer = createStringer();
+    immutableStringer = MutableBuilder.createDefault()
+      .with(pojo.getClass().getSimpleName())
+      .enclosingAsState((builder) ->
+        builder
+          .withProperty(ExamplePojo.name_FIELD, pojo::getName).cacheable()
+          .andProperty(ExamplePojo.age_FIELD, pojo::getAge).cacheable()
+          .andProperty(ExamplePojo.id_FIELD, pojo::getId).cacheable()
+          .andProperty(ExamplePojo.telephone_FIELD, pojo::getTelephone).cacheable()
+      )
+      .build();
   }
 
   private Stringer createStringer() {
@@ -54,13 +65,17 @@ public class GuavaComparisonBenchmark {
 
   @Benchmark
   public String renderAnExamplePojoWithAStringerBuilder() {
-    return createStringer()
-      .get();
+    return createStringer().get();
   }
 
   @Benchmark
-  public String renderAnExamplePojoWithAStringer() {
-    return stringer.get();
+  public String renderAnExamplePojoWithADefaultStringer() {
+    return defaultStringer.get();
+  }
+
+  @Benchmark
+  public String renderAnExamplePojoWithAnImmutableStringer() {
+    return immutableStringer.get();
   }
 
   public static void main(String[] args) throws RunnerException {
