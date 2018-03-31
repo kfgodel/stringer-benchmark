@@ -16,13 +16,32 @@ public class GuavaComparisonBenchmark {
 
 
   private ExamplePojo pojo = ExamplePojo.createDefault();
-  private Stringer defaultStringer;
+  private Stringer dynamicStringer;
+  private Stringer lazyStringer;
   private Stringer immutableStringer;
 
   @Setup(Level.Trial)
   public void prepareStringers() {
-    defaultStringer = createStringer();
-    immutableStringer = MutableBuilder.createDefault()
+    dynamicStringer = createDynamic();
+    lazyStringer = createLazy();
+    immutableStringer = createImmutable();
+  }
+
+  private Stringer createImmutable() {
+    return MutableBuilder.createDefault()
+      .with(pojo.getClass().getSimpleName())
+      .enclosingAsState((builder) ->
+        builder
+          .withProperty(ExamplePojo.name_FIELD, pojo.getName())
+          .andProperty(ExamplePojo.age_FIELD, pojo.getAge())
+          .andProperty(ExamplePojo.id_FIELD, pojo.getId())
+          .andProperty(ExamplePojo.telephone_FIELD, pojo.getTelephone())
+      )
+      .build();
+  }
+
+  private Stringer createLazy() {
+    return MutableBuilder.createDefault()
       .with(pojo.getClass().getSimpleName())
       .enclosingAsState((builder) ->
         builder
@@ -34,7 +53,7 @@ public class GuavaComparisonBenchmark {
       .build();
   }
 
-  private Stringer createStringer() {
+  private Stringer createDynamic() {
     return MutableBuilder.createDefault()
       .with(pojo.getClass().getSimpleName())
       .enclosingAsState((builder) ->
@@ -64,13 +83,18 @@ public class GuavaComparisonBenchmark {
   }
 
   @Benchmark
-  public String renderAnExamplePojoWithAStringerBuilder() {
-    return createStringer().get();
+  public String renderAnExamplePojoWithABuilder() {
+    return createDynamic().get();
   }
 
   @Benchmark
-  public String renderAnExamplePojoWithADefaultStringer() {
-    return defaultStringer.get();
+  public String renderAnExamplePojoWithADynamicStringer() {
+    return dynamicStringer.get();
+  }
+
+  @Benchmark
+  public String renderAnExamplePojoWithALazyStringer() {
+    return lazyStringer.get();
   }
 
   @Benchmark
