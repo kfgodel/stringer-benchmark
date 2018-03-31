@@ -46,9 +46,9 @@ public class GuavaComparisonBenchmark {
       .enclosingAsState((builder) ->
         builder
           .withProperty(ExamplePojo.name_FIELD, pojo::getName).cacheable()
-          .andProperty(ExamplePojo.age_FIELD, pojo::getAge).cacheable()
+          .andProperty(ExamplePojo.age_FIELD, pojo::getAge)
           .andProperty(ExamplePojo.id_FIELD, pojo::getId).cacheable()
-          .andProperty(ExamplePojo.telephone_FIELD, pojo::getTelephone).cacheable()
+          .andProperty(ExamplePojo.telephone_FIELD, pojo::getTelephone)
       )
       .build();
   }
